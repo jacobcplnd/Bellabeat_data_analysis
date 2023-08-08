@@ -1,0 +1,421 @@
+---
+title: "Bellabeat Data Analysis Case Study"
+author: "Jacob Copeland"
+date: "2023-08-03"
+LinkedIn: https://www.linkedin.com/in/jacobcplnd/ 
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Welcome to my Bellabeat data analysis case study! In this project, I have assumed the role of a junior data analyst at Bellabeat, a high-tech manufacturer of health-focused products for women. I will be followig the data analysis process to answer key business questions and provide next steps for the Bellabeat to become a larger player in the global smart device market.
+
+Bellabeat Products:
+
+<ul>
+
+<li>Bellabeat App: Used to help track user data on activity, sleep, stress, menstral cycle, and mindfulness habits. All smart devices connect with the app to provide a central location for users.</li>
+
+<li>Leaf: Wellness tracker that can be worn as braclet, necklace, or clip. Used to track user activity, sleep, and stress.</li>
+
+<li>Time: Wellness watch to help track user activity, sleep, and stress.</li>
+
+<li>Spring: Smart water bottle used to track user's daily hydration levels.</li>
+
+<li>Bellabeat Membership: Subscribtion-based membership that offers users 24/7 access to personalized guides on nutrition, activity, sleep, health and beauty, and mindfulness.</li>
+
+</ul>
+
+## Scenario
+
+I have been asked to focus on one product and provide an analysis on that smart device's data to see how consumers are using said product. I will also be presenting my findings to the Bellabeat executive team as well as a recommendation for the company's marketing team to help find new growth opportunities.
+
+### Deliverables
+
+I will be using the data analysis process to produce the following deliverables:
+
+<ol>
+
+<li>A clear summary of the business task</li>
+
+<li>A description of all data sources used</li>
+
+<li>Documentation of any cleaning or manipulation of data</li>
+
+<li>A summary of your analysis</li>
+
+<li>Supporting visualizations and key findings</li>
+
+<li>Your top high-level content recommendations based on your analysis</li>
+
+</ol>
+
+## Step 1: Ask
+
+Bellabeat cofounder and Cheif Creative Officer, Urška Sršen, has tasked me with analyzing smart device data on consumers using non-Bellabeat devices and apply this insight in my presentation to answer the following questions:
+
+<ol>
+
+<li>What are some trends in smart device usage?</li>
+
+<li>How could these trends apply to Bellabeat customers?</li>
+
+<li>How could these trends help influence Bellabeat marketing strategy?</li>
+
+</ol>
+
+### Deliverable for Step 1
+
+In this phase, I have identified my key stakeholders: the marketing and excecutive team for Bellabeat As well as the business task: Analyzing non-Bellabeat smart device data to help strengthen marketing stratagies on one Bellabeat product to aid the company in becoming a larger player in the global market.
+
+After considering all of the available products, I chose to work with Leaf. I think the idea of a different style of a wearable smart device is very unique!
+
+## Step 2: Prepare
+
+I was pointed towards [this](https://www.kaggle.com/datasets/arashnic/fitbit) data set from Kaggle. It contains personal fitness tracker data from about thirty FitBit users who consented to submitting their personal data including minute-level output for physical activity, heart rate, and sleep monitoring as well as daily activity, steps, and heart rate.
+
+I know that for my chosen product, I will need data that deals with how active the users are, their stress levels (I will be assuming this as heart rate), and what their sleep patterns are like.
+
+### Importing the data
+
+The first thing I need to do after downloading the data set is importing it into R. To do this I need to:
+
+-   Install and upload required packages
+
+```{r}
+library(janitor)
+library(skimr)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+```
+
+-   Set me current working directory where the data set is being stored.
+
+```{r}
+setwd("~/R/BellaBeat")
+```
+
+-   Next, I need to import the spreadsheets I will be using
+
+```{r}
+daily_activity <- read_csv("Fitabase Data 4.12.16-5.12.16/dailyActivity_merged.csv")
+```
+
+```{r}
+heartrate <- read_csv("Fitabase Data 4.12.16-5.12.16/heartrate_seconds_merged.csv")
+```
+
+```{r}
+sleep <- read_csv("Fitabase Data 4.12.16-5.12.16/sleepDay_merged.csv")
+```
+
+### Inspecting the Data
+
+Now that I have all the spreadsheets needed for my analysis, it's time to prepare these data sets for for the next step!
+
+I'll start by getting a small sample of each set to get an idea of the structure and values of each column as well as check for any outliers in the numeric columns.
+
+```{r}
+summary(daily_activity)
+head(daily_activity)
+```
+
+```{r}
+summary(heartrate)
+head(heartrate)
+```
+
+```{r}
+summary(sleep)
+head(sleep)
+```
+
+Finally, I'll double check everything to make absolutely sure I haven't missed anything.
+
+```{r}
+skim(daily_activity)
+```
+
+```{r}
+skim(heartrate)
+```
+
+```{r}
+skim(sleep)
+```
+
+### Deliverable for Step 2
+
+In this phase, I imported four spreadsheets that provide us with the following information:
+
+-   **Daily activity**
+
+    -   Steps
+
+        -   Total daily steps
+
+        -   Total distance
+
+    -   Activity level
+
+        -   Very active (distance and minutes)
+
+        -   Moderately active (distance and minutes)
+
+        -   Lightly active (distance and minutes)
+
+    -   Calories
+
+-   **Heart Rate**
+
+    -   Recorded every 5 seconds
+    -   The heart rate at the time of recording
+
+-   **Sleep**
+
+    -   Minutes asleep
+
+    -   Minutes spent in bed
+
+Afterwards, I looked at a preview of the data sets to get a better idea of what the data is telling me and where I need to start the cleaning process.
+
+## Step 3: Process
+
+Now that I have a better understanding of what this data is telling me, it's time to clean it up a little so I can accurately analyze it.
+
+I'll start with any missing values. After getting a summary of all the spreadsheets, I noticed that none of the spreadsheets I am using have missing values, but its always a good idea to double check!
+
+```{r}
+summary(is.na(daily_activity))
+```
+
+```{r}
+summary(is.na(heartrate))
+```
+
+```{r}
+summary(is.na(sleep))
+```
+
+Now that I have taken care of all NA values, I will move on to any duplicates.
+
+```{r}
+sum(duplicated(daily_activity))
+```
+
+```{r}
+sum(duplicated(heartrate))
+```
+
+```{r}
+sum(duplicated(sleep))
+```
+
+So there is only one spreadsheet with duplicates I will need to remove!
+
+```{r}
+duplicates <- sleep[duplicated(sleep) | duplicated(sleep, fromLast = TRUE), ]
+View(duplicates)
+sleep_no_dupe <- sleep[!duplicated(sleep), ]
+```
+
+The next step in the process phase is to clean up the column names for readability.
+
+```{r}
+daily_activity_clean <- clean_names(daily_activity)
+```
+
+```{r}
+heartrate_clean <- clean_names(heartrate)
+```
+
+```{r}
+sleep_clean <- clean_names(sleep_no_dupe)
+```
+
+This will help ensure that all of the column names are uniform.
+
+I want to do is add a new column in the spreadsheets so that I will also have the day of the week as well as the date.
+
+```{r}
+sleep_clean$sleep_day <- as.Date(sleep_clean$sleep_day, format = "%m/%d/%Y")
+sleep_clean$day_of_week <- wday(sleep_clean$sleep_day, label = TRUE)
+glimpse(sleep_clean)
+```
+
+```{r}
+daily_activity_clean$activity_date <- as.Date(daily_activity_clean$activity_date, format = "%m/%d/%Y")
+daily_activity_clean$day_of_week <- wday(daily_activity_clean$activity_date, label = TRUE)
+glimpse(daily_activity_clean)
+```
+
+I also want to separate the date and time from the heart rate spreadsheet
+
+```{r}
+heartrate_clean <- separate(heartrate_clean, time, into = c("date", "time_in_seconds"), sep = " ")
+```
+
+```{r}
+heartrate_clean$date <- as.Date(heartrate_clean$date, format = "%m/%d/%Y")
+heartrate_clean$day_of_week <- wday(heartrate_clean$date, label = TRUE)
+glimpse(heartrate_clean)
+```
+
+And create a new column for total minutes in daily activity
+
+```{r}
+daily_activity_clean <- daily_activity_clean %>% 
+  mutate(total_minutes = very_active_minutes + fairly_active_minutes + lightly_active_minutes + sedentary_minutes)
+```
+
+Finally, I want to see the total hours asleep and hours in bed.
+
+```{r}
+sleep_clean <- sleep_clean %>%
+  mutate(total_hours_asleep = total_minutes_asleep / 60)
+sleep_clean <- sleep_clean %>%
+  mutate(total_hours_in_bed = total_time_in_bed / 60)
+```
+
+Now I can perform analysis on how active the users were on each day of the week and the sleeping trends per day!
+
+### Deliverable for Step 3
+
+In this step I have documented all of the cleaning needed to analyze the data
+## Step 4: Analyze
+
+Now that my data is clean, it's time to start my analysis and make some predictions!
+
+To start, I need to see all the trends in the following:
+
+-   Average distance by day
+
+```{r}
+avg_distance_by_day <- daily_activity_clean %>%
+  select(day_of_week, total_distance) %>%
+  group_by(day_of_week) %>% 
+  summarize(total_distance = mean(total_distance, na.rm = TRUE))
+View(avg_distance_by_day)
+```
+
+-   Average steps by day
+
+```{r}
+avg_steps_by_day <- daily_activity_clean %>%
+  select(day_of_week, total_steps) %>%
+  group_by(day_of_week) %>% 
+  summarize(total_steps = mean(total_steps, na.rm = TRUE)) 
+View(avg_steps_by_day)
+```
+
+-   Average time spent being active
+
+```{r}
+avg_active_minutes_by_day <- daily_activity_clean %>%
+  select(day_of_week, total_minutes) %>%
+  group_by(day_of_week) %>% 
+  summarize(total_minutes = mean(total_minutes, na.rm = TRUE))
+View(avg_active_minutes_by_day)
+```
+
+-   Sleep patterns
+
+```{r}
+avg_hours_asleep <- sleep_clean %>%
+  group_by(day_of_week) %>%
+  summarize(
+    average_hours_asleep = mean(total_hours_asleep, na.rm = TRUE)
+  ) %>%
+  mutate(
+    average_hours_asleep = round(average_hours_asleep, 2)
+  ) %>%
+  select(day_of_week, average_hours_asleep)
+View(avg_hours_asleep)
+```
+
+-   Total active minutes per day
+
+```{r}
+active_per_day <- daily_activity_clean %>% 
+  select(day_of_week, very_active_minutes, fairly_active_minutes,
+         lightly_active_minutes, sedentary_minutes) %>% 
+  group_by(day_of_week) %>% 
+  summarise(
+    total_very_active = sum(very_active_minutes, na.rm = TRUE),
+    total_fairly_active = sum(fairly_active_minutes, na.rm = TRUE),
+    total_lightly_active = sum(lightly_active_minutes, na.rm = TRUE),
+    total_sedentary = sum(sedentary_minutes, na.rm = TRUE)
+  )
+View(active_per_day)
+```
+
+### Deliverable for Step 4
+
+Based on this analysis, I would predict the following outcomes:
+
+-   People are sleeping more on the weekends
+
+-   Getting more steps in at the beginning of the work week
+
+-   Tend to relax more on Sundays
+
+-   Most active in the middle of the week
+
+## Step 5: Share
+
+Now its time for my favorite part of the data analytics process: Data visualizations!
+
+To start, I will create several graphs to illustrate my analysis.
+
+My first graph will be on the average distance tracked by day.
+
+```{r}
+ggplot(avg_distance_by_day, aes(x = day_of_week, y = total_distance)) +
+  geom_bar(stat = "identity", fill = "lightblue") +
+  scale_y_continuous(breaks = seq(0, 6, by = 0.5)) +
+  labs(title = "Average Distance by Day", x = "Day of the Week", y = "Distance in Miles") +
+  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
+```
+
+Next is the average steps
+
+```{r}
+ggplot(avg_steps_by_day, aes(x = day_of_week, y = total_steps)) +
+  geom_bar(stat = "identity", fill = "orange") +
+  labs(title = "Average Steps by Day", x = "Day of the Week", y = "Steps") +
+  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
+```
+
+Now I'll do the average hours asleep
+
+```{r}
+ggplot(avg_hours_asleep, aes(x = day_of_week, y = average_hours_asleep)) +
+  geom_bar(stat = "identity", fill = "purple") +
+  scale_y_continuous(breaks = seq(0, 8)) +
+  labs(title = "Average Hours Asleep", x = "Day of the Week", y = "Hours") +
+  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
+```
+
+My next bar graph will be the average time spent being active in minutes
+
+```{r}
+ggplot(avg_active_minutes_by_day, aes(x = day_of_week, y = total_minutes)) +
+  geom_bar(stat = "identity", fill = "darkgreen") +
+  labs(title = "Average Time Active", x = "Day of the Week", y = "Time in Minutes") +
+  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
+```
+
+### Key Finding in Step 5
+
+1.  People tend to be less active and sleep more on Sundays
+
+2.  More active and sleep less on Tuesdays
+
+## Step 6: Act
+
+Based on this analysis, I believe that the subscription would be the most marketable product in addition to the Leaf. The wearable device is unique because almost every wearable smart device for fitness is a watch and to be able to have a product that can be a necklace, clip, or bracelet could add more personality than a standard watch. However, since the data does not provide information such as age, health conditions, or gender, it is more difficult to provide a truly accurate recommendation. Because of this, I believe the subscription would also be beneficial as it can provide a customized wellness plan for each consumer. 
