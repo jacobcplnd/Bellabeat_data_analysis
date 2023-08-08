@@ -6,3 +6,5 @@ I used data Fitbit user data provided by Kaggle to acheive this goal.
 This is the link to that data set: https://www.kaggle.com/datasets/arashnic/fitbit
 After exporting the file into RStudio, I began the cleaning and analysis process.
 I then created several bar graphs and provided my recommendations to help meet the business task needs.
+
+PLease feel free to reach out to me on here or me LinkedIn (https://www.linkedin.com/in/jacobcplnd/) for any questions or feedback!
